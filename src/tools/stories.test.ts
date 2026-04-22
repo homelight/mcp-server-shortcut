@@ -12,6 +12,7 @@ import type {
 	UpdateStory,
 	Workflow,
 } from "@shortcut/client";
+import { z } from "zod";
 import type { ShortcutClientWrapper } from "@/client/shortcut";
 import type { CustomMcpServer } from "@/mcp/CustomMcpServer";
 import { StoryTools } from "./stories";
@@ -177,6 +178,69 @@ describe("StoryTools", () => {
 			expect(mockToolWrite.mock.calls?.[12]?.[0]).toBe("stories-add-external-link");
 			expect(mockToolWrite.mock.calls?.[13]?.[0]).toBe("stories-remove-external-link");
 			expect(mockToolWrite.mock.calls?.[14]?.[0]).toBe("stories-set-external-links");
+		});
+
+		test("should safely coerce numeric strings for stories-update number fields", () => {
+			const mockClient = createMockClient();
+			const mockToolRead = mock();
+			const mockToolWrite = mock();
+			const mockServer = {
+				addToolWithReadAccess: mockToolRead,
+				addToolWithWriteAccess: mockToolWrite,
+			} as unknown as CustomMcpServer;
+
+			StoryTools.create(mockClient, mockServer);
+
+			const updateSchema = mockToolWrite.mock.calls?.[1]?.[2];
+			const parser = z.object(updateSchema);
+
+			const coercedResult = parser.safeParse({
+				storyPublicId: 123,
+				epic: "10",
+				estimate: "3",
+				iteration: "7",
+				workflow_state_id: "102",
+				project_id: "42",
+			});
+
+			expect(coercedResult.success).toBe(true);
+			if (coercedResult.success) {
+				expect(coercedResult.data).toMatchObject({
+					epic: 10,
+					estimate: 3,
+					iteration: 7,
+					workflow_state_id: 102,
+					project_id: 42,
+				});
+			}
+
+			const emptyStringResult = parser.safeParse({
+				storyPublicId: 123,
+				estimate: "",
+			});
+
+			expect(emptyStringResult.success).toBe(false);
+
+			const decimalStringResult = parser.safeParse({
+				storyPublicId: 123,
+				epic: "1.5",
+			});
+
+			expect(decimalStringResult.success).toBe(false);
+
+			const signedStringResult = parser.safeParse({
+				storyPublicId: 123,
+				workflow_state_id: "-2",
+			});
+
+			expect(signedStringResult.success).toBe(false);
+
+			const decimalNumberResult = parser.safeParse({
+				storyPublicId: 123,
+				project_id: 2.5,
+			});
+
+			expect(decimalNumberResult.success).toBe(false);
 		});
 	});
 

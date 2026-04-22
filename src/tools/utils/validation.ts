@@ -41,3 +41,19 @@ export const has = (field: string) =>
 
 export const user = (field: string) =>
 	z.string().optional().describe(`Filter by ${field} (use mention name or "me")`);
+
+function toSafeInteger(value: unknown): unknown {
+	if (typeof value !== "string") return value;
+
+	const trimmed = value.trim();
+	if (!trimmed) return value;
+
+	if (!/^\d+$/.test(trimmed)) return value;
+
+	const parsed = Number(trimmed);
+	return Number.isSafeInteger(parsed) ? parsed : value;
+}
+
+export const safeInteger = () => z.preprocess(toSafeInteger, z.number().int());
+
+export const safeNullableInteger = () => z.preprocess(toSafeInteger, z.number().int().nullable());
