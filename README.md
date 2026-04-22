@@ -61,6 +61,43 @@ Then, either double-click the icon to install or drag the package onto the clien
 
 If your IDE doesn't support HTTP-based MCP servers, or you'd prefer to run the server locally, see the [Local Server Setup](docs/local-server.md) guide. This covers setup for **Windsurf**, **Zed**, **Claude Code**, and any IDE that supports stdio-based MCP servers.
 
+### Docker (shortcut-mcp-local)
+
+Use the local Docker image when your MCP client is configured to launch the server via `docker run`.
+
+Build the Docker image:
+
+```bash
+make build
+```
+
+Then let your MCP client run `docker run ...` directly from its MCP configuration.
+
+Example MCP config:
+
+```json
+{
+  "mcpServers": {
+    "shortcut-local": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-i",
+        "-e",
+        "SHORTCUT_API_TOKEN",
+        "shortcut-mcp-local",
+        "node",
+        "dist/server.js"
+      ],
+      "env": {
+        "SHORTCUT_API_TOKEN": "<YOUR_SHORTCUT_API_TOKEN>"
+      }
+    }
+  }
+}
+```
+
 ## Available Tools
 
 ### Stories
