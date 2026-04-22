@@ -220,6 +220,27 @@ describe("StoryTools", () => {
 			});
 
 			expect(emptyStringResult.success).toBe(false);
+
+			const decimalStringResult = parser.safeParse({
+				storyPublicId: 123,
+				epic: "1.5",
+			});
+
+			expect(decimalStringResult.success).toBe(false);
+
+			const signedStringResult = parser.safeParse({
+				storyPublicId: 123,
+				workflow_state_id: "-2",
+			});
+
+			expect(signedStringResult.success).toBe(false);
+
+			const decimalNumberResult = parser.safeParse({
+				storyPublicId: 123,
+				project_id: 2.5,
+			});
+
+			expect(decimalNumberResult.success).toBe(false);
 		});
 	});
 
