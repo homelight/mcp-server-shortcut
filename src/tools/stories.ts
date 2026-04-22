@@ -4,7 +4,7 @@ import type { ShortcutClientWrapper } from "@/client/shortcut";
 import type { CustomMcpServer } from "@/mcp/CustomMcpServer";
 import { BaseTools } from "./base";
 import { buildSearchQuery, type QueryParams } from "./utils/search";
-import { date, has, is, user } from "./utils/validation";
+import { date, has, is, safeNullableNumber, safeNumber, user } from "./utils/validation";
 
 export class StoryTools extends BaseTools {
 	static create(client: ShortcutClientWrapper, server: CustomMcpServer) {
@@ -125,11 +125,11 @@ export class StoryTools extends BaseTools {
 				name: z.string().max(512).optional().describe("Story name"),
 				description: z.string().max(10_000).optional().describe("Story description"),
 				type: z.enum(["feature", "bug", "chore"]).optional().describe("Story type"),
-				epic: z.number().nullable().optional().describe("Epic ID (null to unset)"),
-				estimate: z.number().nullable().optional().describe("Point estimate (null to unset)"),
-				iteration: z.number().nullable().optional().describe("Iteration ID (null to unset)"),
+				epic: safeNullableNumber().optional().describe("Epic ID (null to unset)"),
+				estimate: safeNullableNumber().optional().describe("Point estimate (null to unset)"),
+				iteration: safeNullableNumber().optional().describe("Iteration ID (null to unset)"),
 				owner_ids: z.array(z.string()).optional().describe("Owner user UUIDs"),
-				workflow_state_id: z.number().optional().describe("Workflow state ID"),
+				workflow_state_id: safeNumber().optional().describe("Workflow state ID"),
 				labels: z
 					.array(
 						z.object({
@@ -150,7 +150,7 @@ export class StoryTools extends BaseTools {
 					.optional()
 					.describe("Custom field values"),
 				team_id: z.string().nullable().optional().describe("Team UUID (null to unset)"),
-				project_id: z.number().nullable().optional().describe("Project ID (null to unset)"),
+				project_id: safeNullableNumber().optional().describe("Project ID (null to unset)"),
 				deadline: z.string().nullable().optional().describe("Due date ISO 8601 (null to unset)"),
 				follower_ids: z.array(z.string()).optional().describe("Follower user UUIDs"),
 				requested_by_id: z.string().optional().describe("Requester user UUID"),
